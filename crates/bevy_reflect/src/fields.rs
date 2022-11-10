@@ -1,4 +1,4 @@
-use crate::Reflect;
+use crate::{Reflect, TypeInfo, Typed};
 use std::any::{Any, TypeId};
 
 /// The named field of a reflected struct.
@@ -64,16 +64,18 @@ pub struct UnnamedField {
     index: usize,
     type_name: &'static str,
     type_id: TypeId,
+    type_info: &'static TypeInfo,
     #[cfg(feature = "documentation")]
     docs: Option<&'static str>,
 }
 
 impl UnnamedField {
-    pub fn new<T: Reflect>(index: usize) -> Self {
+    pub fn new<T: Reflect + Typed>(index: usize) -> Self {
         Self {
             index,
             type_name: std::any::type_name::<T>(),
             type_id: TypeId::of::<T>(),
+            type_info: T::type_info(),
             #[cfg(feature = "documentation")]
             docs: None,
         }
@@ -105,6 +107,11 @@ impl UnnamedField {
     /// Check if the given type matches the field type.
     pub fn is<T: Any>(&self) -> bool {
         TypeId::of::<T>() == self.type_id
+    }
+
+    /// The [`TypeInfo`] of the field.
+    pub fn type_info(&self) -> &'static TypeInfo {
+        self.type_info
     }
 
     /// The docstring of this field, if any.

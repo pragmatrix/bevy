@@ -110,9 +110,9 @@ where
         self
     }
 
-    fn apply(&mut self, value: &dyn Reflect) {
-        crate::list_apply(self, value);
-    }
+    // fn apply(&mut self, value: &dyn Reflect) {
+    //     crate::list_apply(self, value);
+    // }
 
     fn set(&mut self, value: Box<dyn Reflect>) -> Result<(), Box<dyn Reflect>> {
         *self = value.take()?;
