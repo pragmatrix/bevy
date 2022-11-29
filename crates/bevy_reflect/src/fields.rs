@@ -7,17 +7,19 @@ pub struct NamedField {
     name: &'static str,
     type_name: &'static str,
     type_id: TypeId,
+    type_info: &'static TypeInfo,
     #[cfg(feature = "documentation")]
     docs: Option<&'static str>,
 }
 
 impl NamedField {
     /// Create a new [`NamedField`].
-    pub fn new<T: Reflect>(name: &'static str) -> Self {
+    pub fn new<T: Reflect + Typed>(name: &'static str) -> Self {
         Self {
             name,
             type_name: std::any::type_name::<T>(),
             type_id: TypeId::of::<T>(),
+            type_info: T::type_info(),
             #[cfg(feature = "documentation")]
             docs: None,
         }
@@ -49,6 +51,11 @@ impl NamedField {
     /// Check if the given type matches the field type.
     pub fn is<T: Any>(&self) -> bool {
         TypeId::of::<T>() == self.type_id
+    }
+
+    /// The [`TypeInfo`] of the field.
+    pub fn type_info(&self) -> &'static TypeInfo {
+        self.type_info
     }
 
     /// The docstring of this field, if any.
