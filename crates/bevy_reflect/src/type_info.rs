@@ -3,6 +3,7 @@ use crate::{
 };
 use std::{
     any::{Any, TypeId},
+    fmt::Display,
     hash,
 };
 
@@ -112,6 +113,12 @@ pub enum TypeInfo {
     ///
     /// This includes structs like [`DynamicStruct`](crate::DynamicStruct) and [`DynamicList`](crate::DynamicList).
     Dynamic(DynamicInfo),
+}
+
+impl Display for TypeInfo {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.type_name())
+    }
 }
 
 impl hash::Hash for TypeInfo {
