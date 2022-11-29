@@ -1,7 +1,10 @@
 use crate::{
     ArrayInfo, EnumInfo, ListInfo, MapInfo, Reflect, StructInfo, TupleInfo, TupleStructInfo,
 };
-use std::any::{Any, TypeId};
+use std::{
+    any::{Any, TypeId},
+    hash,
+};
 
 /// A static accessor to compile-time type information.
 ///
@@ -110,6 +113,20 @@ pub enum TypeInfo {
     /// This includes structs like [`DynamicStruct`](crate::DynamicStruct) and [`DynamicList`](crate::DynamicList).
     Dynamic(DynamicInfo),
 }
+
+impl hash::Hash for TypeInfo {
+    fn hash<H: hash::Hasher>(&self, state: &mut H) {
+        self.type_id().hash(state)
+    }
+}
+
+impl PartialEq for TypeInfo {
+    fn eq(&self, other: &Self) -> bool {
+        self.type_id().eq(&other.type_id())
+    }
+}
+
+impl Eq for TypeInfo {}
 
 impl TypeInfo {
     /// The [`TypeId`] of the underlying type.
