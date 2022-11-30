@@ -351,8 +351,8 @@ macro_rules! impl_reflect_for_hashmap {
     ($ty:ty) => {
         impl<K, V, S> Map for $ty
         where
-            K: Reflect + Eq + Hash,
-            V: Reflect,
+            K: Reflect + Typed + Eq + Hash,
+            V: Reflect + Typed,
             S: BuildHasher + Send + Sync + 'static,
         {
             fn get(&self, key: &dyn Reflect) -> Option<&dyn Reflect> {
@@ -439,8 +439,8 @@ macro_rules! impl_reflect_for_hashmap {
 
         impl<K, V, S> Reflect for $ty
         where
-            K: Reflect + Eq + Hash,
-            V: Reflect,
+            K: Reflect + Typed + Eq + Hash,
+            V: Reflect + Typed,
             S: BuildHasher + Send + Sync + 'static,
         {
             fn type_name(&self) -> &str {
@@ -508,8 +508,8 @@ macro_rules! impl_reflect_for_hashmap {
 
         impl<K, V, S> Typed for $ty
         where
-            K: Reflect + Eq + Hash,
-            V: Reflect,
+            K: Reflect + Typed + Eq + Hash,
+            V: Reflect + Typed,
             S: BuildHasher + Send + Sync + 'static,
         {
             fn type_info() -> &'static TypeInfo {
@@ -518,23 +518,23 @@ macro_rules! impl_reflect_for_hashmap {
             }
         }
 
-        impl<K, V, S> GetTypeRegistration for $ty
-        where
-            K: FromReflect + Eq + Hash,
-            V: FromReflect,
-            S: BuildHasher + Send + Sync + 'static,
-        {
-            fn get_type_registration() -> TypeRegistration {
-                let mut registration = TypeRegistration::of::<Self>();
-                registration.insert::<ReflectFromPtr>(FromType::<Self>::from_type());
-                registration
-            }
-        }
+        // impl<K, V, S> GetTypeRegistration for $ty
+        // where
+        //     K: FromReflect + Eq + Hash,
+        //     V: FromReflect,
+        //     S: BuildHasher + Send + Sync + 'static,
+        // {
+        //     fn get_type_registration() -> TypeRegistration {
+        //         let mut registration = TypeRegistration::of::<Self>();
+        //         registration.insert::<ReflectFromPtr>(FromType::<Self>::from_type());
+        //         registration
+        //     }
+        // }
 
         impl<K, V, S> FromReflect for $ty
         where
-            K: FromReflect + Eq + Hash,
-            V: FromReflect,
+            K: FromReflect + Typed + Eq + Hash,
+            V: FromReflect + Typed,
             S: BuildHasher + Default + Send + Sync + 'static,
         {
             fn from_reflect(reflect: &dyn Reflect) -> Option<Self> {

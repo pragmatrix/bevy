@@ -99,22 +99,26 @@ pub struct MapInfo {
     type_id: TypeId,
     key_type_name: &'static str,
     key_type_id: TypeId,
+    key_type_info: &'static TypeInfo,
     value_type_name: &'static str,
     value_type_id: TypeId,
+    value_type_info: &'static TypeInfo,
     #[cfg(feature = "documentation")]
     docs: Option<&'static str>,
 }
 
 impl MapInfo {
     /// Create a new [`MapInfo`].
-    pub fn new<TMap: Map, TKey: Hash + Reflect, TValue: Reflect>() -> Self {
+    pub fn new<TMap: Map, TKey: Hash + Reflect + Typed, TValue: Reflect + Typed>() -> Self {
         Self {
             type_name: std::any::type_name::<TMap>(),
             type_id: TypeId::of::<TMap>(),
             key_type_name: std::any::type_name::<TKey>(),
             key_type_id: TypeId::of::<TKey>(),
+            key_type_info: TKey::type_info(),
             value_type_name: std::any::type_name::<TValue>(),
             value_type_id: TypeId::of::<TValue>(),
+            value_type_info: TValue::type_info(),
             #[cfg(feature = "documentation")]
             docs: None,
         }
@@ -155,6 +159,10 @@ impl MapInfo {
         self.key_type_id
     }
 
+    pub fn key_type_info(&self) -> &'static TypeInfo {
+        self.key_type_info
+    }
+
     /// Check if the given type matches the key type.
     pub fn key_is<T: Any>(&self) -> bool {
         TypeId::of::<T>() == self.key_type_id
@@ -170,6 +178,10 @@ impl MapInfo {
     /// The [`TypeId`] of the value.
     pub fn value_type_id(&self) -> TypeId {
         self.value_type_id
+    }
+
+    pub fn value_type_info(&self) -> &'static TypeInfo {
+        self.value_type_info
     }
 
     /// Check if the given type matches the value type.
