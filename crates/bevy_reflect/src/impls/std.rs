@@ -826,14 +826,14 @@ impl Reflect for &'static Path {
         self
     }
 
-    fn apply(&mut self, value: &dyn Reflect) {
-        let value = value.as_any();
-        if let Some(&value) = value.downcast_ref::<Self>() {
-            *self = value;
-        } else {
-            panic!("Value is not a {}.", std::any::type_name::<Self>());
-        }
-    }
+    // fn apply(&mut self, value: &dyn Reflect) {
+    //     let value = value.as_any();
+    //     if let Some(&value) = value.downcast_ref::<Self>() {
+    //         *self = value;
+    //     } else {
+    //         panic!("Value is not a {}.", std::any::type_name::<Self>());
+    //     }
+    // }
 
     fn set(&mut self, value: Box<dyn Reflect>) -> Result<(), Box<dyn Reflect>> {
         *self = value.take()?;
@@ -852,9 +852,9 @@ impl Reflect for &'static Path {
         ReflectOwned::Value(self)
     }
 
-    fn clone_value(&self) -> Box<dyn Reflect> {
-        Box::new(*self)
-    }
+    // fn clone_value(&self) -> Box<dyn Reflect> {
+    //     Box::new(*self)
+    // }
 
     fn reflect_hash(&self) -> Option<u64> {
         let mut hasher = crate::ReflectHasher::default();
