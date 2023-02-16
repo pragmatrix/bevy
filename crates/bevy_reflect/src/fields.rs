@@ -71,7 +71,9 @@ pub struct UnnamedField {
     index: usize,
     type_name: &'static str,
     type_id: TypeId,
-    type_info: &'static TypeInfo,
+    // Indirection to break infinite `type_info()` invocation cycles when Unnamed field is created
+    // from within a `type_info()` call.
+    type_info: fn() -> &'static TypeInfo,
     #[cfg(feature = "documentation")]
     docs: Option<&'static str>,
 }
@@ -82,7 +84,7 @@ impl UnnamedField {
             index,
             type_name: std::any::type_name::<T>(),
             type_id: TypeId::of::<T>(),
-            type_info: T::type_info(),
+            type_info: || T::type_info(),
             #[cfg(feature = "documentation")]
             docs: None,
         }
@@ -118,7 +120,7 @@ impl UnnamedField {
 
     /// The [`TypeInfo`] of the field.
     pub fn type_info(&self) -> &'static TypeInfo {
-        self.type_info
+        (self.type_info)()
     }
 
     /// The docstring of this field, if any.
