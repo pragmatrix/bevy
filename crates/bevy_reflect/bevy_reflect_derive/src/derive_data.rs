@@ -467,7 +467,7 @@ impl<'a> ReflectEnum<'a> {
         let bevy_reflect_path = &self.meta().bevy_reflect_path;
         WhereClauseOptions {
             active_types: self.active_types().into(),
-            active_trait_bounds: quote! { #bevy_reflect_path::FromReflect },
+            active_trait_bounds: quote! { #bevy_reflect_path::Reflect },
             ignored_types: self.ignored_types().into(),
             ignored_trait_bounds: quote! { #FQAny + #FQSend + #FQSync + #FQDefault },
         }

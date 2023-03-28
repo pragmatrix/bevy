@@ -85,11 +85,11 @@ pub trait Map: Reflect {
     //     value: Box<dyn Reflect>,
     // ) -> Option<Box<dyn Reflect>>;
 
-    /// Removes an entry from the map.
-    ///
-    /// If the map did not have this key present, `None` is returned.
-    /// If the map did have this key present, the removed value is returned.
-    fn remove(&mut self, key: &dyn Reflect) -> Option<Box<dyn Reflect>>;
+    // Removes an entry from the map.
+    //
+    // If the map did not have this key present, `None` is returned.
+    // If the map did have this key present, the removed value is returned.
+    // fn remove(&mut self, key: &dyn Reflect) -> Option<Box<dyn Reflect>>;
 }
 
 /// A container for compile-time map info.
@@ -291,13 +291,13 @@ impl Map for DynamicMap {
     //     }
     // }
 
-    fn remove(&mut self, key: &dyn Reflect) -> Option<Box<dyn Reflect>> {
-        let index = self
-            .indices
-            .remove(&key.reflect_hash().expect(HASH_ERROR))?;
-        let (_key, value) = self.values.remove(index);
-        Some(value)
-    }
+    // fn remove(&mut self, key: &dyn Reflect) -> Option<Box<dyn Reflect>> {
+    //     let index = self
+    //         .indices
+    //         .remove(&key.reflect_hash().expect(HASH_ERROR))?;
+    //     let (_key, value) = self.values.remove(index);
+    //     Some(value)
+    // }
 
     fn drain(self: Box<Self>) -> Vec<(Box<dyn Reflect>, Box<dyn Reflect>)> {
         self.values

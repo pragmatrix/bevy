@@ -246,18 +246,6 @@ impl List for DynamicList {
         self.values
     }
 
-    fn len(&self) -> usize {
-        self.values.len()
-    }
-
-    fn iter(&self) -> ListIter {
-        ListIter::new(self)
-    }
-
-    fn drain(self: Box<Self>) -> Vec<Box<dyn Reflect>> {
-        self.values
-    }
-
     // fn clone_dynamic(&self) -> DynamicList {
     //     DynamicList {
     //         name: self.name.clone(),

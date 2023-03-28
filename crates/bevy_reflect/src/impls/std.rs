@@ -180,7 +180,7 @@ impl_from_reflect_value!(NonZeroI8);
 
 macro_rules! impl_reflect_for_veclike {
     ($ty:ty, $insert:expr, $remove:expr, $push:expr, $pop:expr, $sub:ty) => {
-        impl<T: FromReflect> List for $ty {
+        impl<T: FromReflect + Typed> List for $ty {
             #[inline]
             fn get(&self, index: usize) -> Option<&dyn Reflect> {
                 <$sub>::get(self, index).map(|value| value as &dyn Reflect)
@@ -239,7 +239,7 @@ macro_rules! impl_reflect_for_veclike {
             }
         }
 
-        impl<T: FromReflect> Reflect for $ty {
+        impl<T: FromReflect + Typed> Reflect for $ty {
             fn type_name(&self) -> &str {
                 std::any::type_name::<Self>()
             }
@@ -306,14 +306,14 @@ macro_rules! impl_reflect_for_veclike {
             }
         }
 
-        impl<T: FromReflect> Typed for $ty {
+        impl<T: FromReflect + Typed> Typed for $ty {
             fn type_info() -> &'static TypeInfo {
                 static CELL: GenericTypeInfoCell = GenericTypeInfoCell::new();
                 CELL.get_or_insert::<Self, _>(|| TypeInfo::List(ListInfo::new::<Self, T>()))
             }
         }
 
-        impl<T: FromReflect> GetTypeRegistration for $ty {
+        impl<T: FromReflect + Typed> GetTypeRegistration for $ty {
             fn get_type_registration() -> TypeRegistration {
                 let mut registration = TypeRegistration::of::<$ty>();
                 registration.insert::<ReflectFromPtr>(FromType::<$ty>::from_type());
@@ -321,7 +321,7 @@ macro_rules! impl_reflect_for_veclike {
             }
         }
 
-        impl<T: FromReflect> FromReflect for $ty {
+        impl<T: FromReflect + Typed> FromReflect for $ty {
             fn from_reflect(reflect: &dyn Reflect) -> Option<Self> {
                 if let ReflectRef::List(ref_list) = reflect.reflect_ref() {
                     let mut new_list = Self::with_capacity(ref_list.len());
@@ -425,16 +425,16 @@ macro_rules! impl_reflect_for_hashmap {
             //         .map(|old_value| Box::new(old_value) as Box<dyn Reflect>)
             // }
 
-            fn remove(&mut self, key: &dyn Reflect) -> Option<Box<dyn Reflect>> {
-                let mut from_reflect = None;
-                key.downcast_ref::<K>()
-                    .or_else(|| {
-                        from_reflect = K::from_reflect(key);
-                        from_reflect.as_ref()
-                    })
-                    .and_then(|key| self.remove(key))
-                    .map(|value| Box::new(value) as Box<dyn Reflect>)
-            }
+            // fn remove(&mut self, key: &dyn Reflect) -> Option<Box<dyn Reflect>> {
+            //     let mut from_reflect = None;
+            //     key.downcast_ref::<K>()
+            //         .or_else(|| {
+            //             from_reflect = K::from_reflect(key);
+            //             from_reflect.as_ref()
+            //         })
+            //         .and_then(|key| self.remove(key))
+            //         .map(|value| Box::new(value) as Box<dyn Reflect>)
+            // }
         }
 
         impl<K, V, S> Reflect for $ty
@@ -776,12 +776,12 @@ impl Reflect for Cow<'static, str> {
     //     Box::new(self.clone())
     // }
 
-    fn reflect_hash(&self) -> Option<u64> {
-        let mut hasher = crate::ReflectHasher::default();
-        Hash::hash(&std::any::Any::type_id(self), &mut hasher);
-        Hash::hash(self, &mut hasher);
-        Some(hasher.finish())
-    }
+    // fn reflect_hash(&self) -> Option<u64> {
+    //     let mut hasher = crate::ReflectHasher::default();
+    //     Hash::hash(&std::any::Any::type_id(self), &mut hasher);
+    //     Hash::hash(self, &mut hasher);
+    //     Some(hasher.finish())
+    // }
 
     fn reflect_partial_eq(&self, value: &dyn Reflect) -> Option<bool> {
         let value = value.as_any();
@@ -856,12 +856,12 @@ impl Reflect for &'static Path {
     //     Box::new(*self)
     // }
 
-    fn reflect_hash(&self) -> Option<u64> {
-        let mut hasher = crate::ReflectHasher::default();
-        Hash::hash(&std::any::Any::type_id(self), &mut hasher);
-        Hash::hash(self, &mut hasher);
-        Some(hasher.finish())
-    }
+    // fn reflect_hash(&self) -> Option<u64> {
+    //     let mut hasher = crate::ReflectHasher::default();
+    //     Hash::hash(&std::any::Any::type_id(self), &mut hasher);
+    //     Hash::hash(self, &mut hasher);
+    //     Some(hasher.finish())
+    // }
 
     fn reflect_partial_eq(&self, value: &dyn Reflect) -> Option<bool> {
         let value = value.as_any();
@@ -1117,86 +1117,6 @@ impl<T: Reflect + Typed> Typed for Option<T> {
     }
 }
 
-impl Reflect for Cow<'static, str> {
-    fn type_name(&self) -> &str {
-        std::any::type_name::<Self>()
-    }
-
-    fn get_type_info(&self) -> &'static TypeInfo {
-        <Self as Typed>::type_info()
-    }
-
-    fn into_any(self: Box<Self>) -> Box<dyn Any> {
-        self
-    }
-
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-
-    fn as_any_mut(&mut self) -> &mut dyn Any {
-        self
-    }
-
-    fn into_reflect(self: Box<Self>) -> Box<dyn Reflect> {
-        self
-    }
-
-    fn as_reflect(&self) -> &dyn Reflect {
-        self
-    }
-
-    fn as_reflect_mut(&mut self) -> &mut dyn Reflect {
-        self
-    }
-
-    fn apply(&mut self, value: &dyn Reflect) {
-        let value = value.as_any();
-        if let Some(value) = value.downcast_ref::<Self>() {
-            *self = value.clone();
-        } else {
-            panic!("Value is not a {}.", std::any::type_name::<Self>());
-        }
-    }
-
-    fn set(&mut self, value: Box<dyn Reflect>) -> Result<(), Box<dyn Reflect>> {
-        *self = value.take()?;
-        Ok(())
-    }
-
-    fn reflect_ref(&self) -> ReflectRef {
-        ReflectRef::Value(self)
-    }
-
-    fn reflect_mut(&mut self) -> ReflectMut {
-        ReflectMut::Value(self)
-    }
-
-    fn reflect_owned(self: Box<Self>) -> ReflectOwned {
-        ReflectOwned::Value(self)
-    }
-
-    fn clone_value(&self) -> Box<dyn Reflect> {
-        Box::new(self.clone())
-    }
-
-    fn reflect_hash(&self) -> Option<u64> {
-        let mut hasher = reflect_hasher();
-        Hash::hash(&std::any::Any::type_id(self), &mut hasher);
-        Hash::hash(self, &mut hasher);
-        Some(hasher.finish())
-    }
-
-    fn reflect_partial_eq(&self, value: &dyn Reflect) -> Option<bool> {
-        let value = value.as_any();
-        if let Some(value) = value.downcast_ref::<Self>() {
-            Some(std::cmp::PartialEq::eq(self, value))
-        } else {
-            Some(false)
-        }
-    }
-}
-
 impl Typed for Cow<'static, str> {
     fn type_info() -> &'static TypeInfo {
         static CELL: NonGenericTypeInfoCell = NonGenericTypeInfoCell::new();
@@ -1222,86 +1142,6 @@ impl FromReflect for Cow<'static, str> {
                 .downcast_ref::<Cow<'static, str>>()?
                 .clone(),
         )
-    }
-}
-
-impl Reflect for &'static Path {
-    fn type_name(&self) -> &str {
-        std::any::type_name::<Self>()
-    }
-
-    fn get_type_info(&self) -> &'static TypeInfo {
-        <Self as Typed>::type_info()
-    }
-
-    fn into_any(self: Box<Self>) -> Box<dyn Any> {
-        self
-    }
-
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-
-    fn as_any_mut(&mut self) -> &mut dyn Any {
-        self
-    }
-
-    fn into_reflect(self: Box<Self>) -> Box<dyn Reflect> {
-        self
-    }
-
-    fn as_reflect(&self) -> &dyn Reflect {
-        self
-    }
-
-    fn as_reflect_mut(&mut self) -> &mut dyn Reflect {
-        self
-    }
-
-    fn apply(&mut self, value: &dyn Reflect) {
-        let value = value.as_any();
-        if let Some(&value) = value.downcast_ref::<Self>() {
-            *self = value;
-        } else {
-            panic!("Value is not a {}.", std::any::type_name::<Self>());
-        }
-    }
-
-    fn set(&mut self, value: Box<dyn Reflect>) -> Result<(), Box<dyn Reflect>> {
-        *self = value.take()?;
-        Ok(())
-    }
-
-    fn reflect_ref(&self) -> ReflectRef {
-        ReflectRef::Value(self)
-    }
-
-    fn reflect_mut(&mut self) -> ReflectMut {
-        ReflectMut::Value(self)
-    }
-
-    fn reflect_owned(self: Box<Self>) -> ReflectOwned {
-        ReflectOwned::Value(self)
-    }
-
-    fn clone_value(&self) -> Box<dyn Reflect> {
-        Box::new(*self)
-    }
-
-    fn reflect_hash(&self) -> Option<u64> {
-        let mut hasher = reflect_hasher();
-        Hash::hash(&std::any::Any::type_id(self), &mut hasher);
-        Hash::hash(self, &mut hasher);
-        Some(hasher.finish())
-    }
-
-    fn reflect_partial_eq(&self, value: &dyn Reflect) -> Option<bool> {
-        let value = value.as_any();
-        if let Some(value) = value.downcast_ref::<Self>() {
-            Some(std::cmp::PartialEq::eq(self, value))
-        } else {
-            Some(false)
-        }
     }
 }
 

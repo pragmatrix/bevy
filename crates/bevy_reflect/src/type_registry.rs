@@ -555,7 +555,7 @@ impl ReflectFromPtr {
     }
 }
 
-impl<T: Reflect> FromType<T> for ReflectFromPtr {
+impl<T: Reflect + Typed> FromType<T> for ReflectFromPtr {
     fn from_type() -> Self {
         ReflectFromPtr {
             type_id: std::any::TypeId::of::<T>(),
