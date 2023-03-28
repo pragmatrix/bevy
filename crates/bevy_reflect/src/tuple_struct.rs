@@ -47,8 +47,8 @@ pub trait TupleStruct: Reflect {
     /// Returns an iterator over the values of the tuple struct's fields.
     fn iter_fields(&self) -> TupleStructFieldIter;
 
-    /// Clones the struct into a [`DynamicTupleStruct`].
-    fn clone_dynamic(&self) -> DynamicTupleStruct;
+    // Clones the struct into a [`DynamicTupleStruct`].
+    // fn clone_dynamic(&self) -> DynamicTupleStruct;
 }
 
 /// A container for compile-time tuple struct info.
@@ -272,16 +272,16 @@ impl TupleStruct for DynamicTupleStruct {
         }
     }
 
-    fn clone_dynamic(&self) -> DynamicTupleStruct {
-        DynamicTupleStruct {
-            name: self.name.clone(),
-            fields: self
-                .fields
-                .iter()
-                .map(|value| value.clone_value())
-                .collect(),
-        }
-    }
+    // fn clone_dynamic(&self) -> DynamicTupleStruct {
+    //     DynamicTupleStruct {
+    //         name: self.name.clone(),
+    //         fields: self
+    //             .fields
+    //             .iter()
+    //             .map(|value| value.clone_value())
+    //             .collect(),
+    //     }
+    // }
 }
 
 impl Reflect for DynamicTupleStruct {
@@ -325,10 +325,10 @@ impl Reflect for DynamicTupleStruct {
         self
     }
 
-    #[inline]
-    fn clone_value(&self) -> Box<dyn Reflect> {
-        Box::new(self.clone_dynamic())
-    }
+    // #[inline]
+    // fn clone_value(&self) -> Box<dyn Reflect> {
+    //     Box::new(self.clone_dynamic())
+    // }
 
     #[inline]
     fn reflect_ref(&self) -> ReflectRef {
@@ -345,17 +345,17 @@ impl Reflect for DynamicTupleStruct {
         ReflectOwned::TupleStruct(self)
     }
 
-    fn apply(&mut self, value: &dyn Reflect) {
-        if let ReflectRef::TupleStruct(tuple_struct) = value.reflect_ref() {
-            for (i, value) in tuple_struct.iter_fields().enumerate() {
-                if let Some(v) = self.field_mut(i) {
-                    v.apply(value);
-                }
-            }
-        } else {
-            panic!("Attempted to apply non-TupleStruct type to TupleStruct type.");
-        }
-    }
+    // fn apply(&mut self, value: &dyn Reflect) {
+    //     if let ReflectRef::TupleStruct(tuple_struct) = value.reflect_ref() {
+    //         for (i, value) in tuple_struct.iter_fields().enumerate() {
+    //             if let Some(v) = self.field_mut(i) {
+    //                 v.apply(value);
+    //             }
+    //         }
+    //     } else {
+    //         panic!("Attempted to apply non-TupleStruct type to TupleStruct type.");
+    //     }
+    // }
 
     fn set(&mut self, value: Box<dyn Reflect>) -> Result<(), Box<dyn Reflect>> {
         *self = value.take()?;

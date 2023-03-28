@@ -83,20 +83,20 @@ pub(crate) fn impl_value(meta: &ReflectMeta) -> TokenStream {
                 self
             }
 
-            #[inline]
-            fn clone_value(&self) -> #FQBox<dyn #bevy_reflect_path::Reflect> {
-                #FQBox::new(#FQClone::clone(self))
-            }
+            // #[inline]
+            // fn clone_value(&self) -> #FQBox<dyn #bevy_reflect_path::Reflect> {
+            //     #FQBox::new(#FQClone::clone(self))
+            // }
 
-            #[inline]
-            fn apply(&mut self, value: &dyn #bevy_reflect_path::Reflect) {
-                let value = #bevy_reflect_path::Reflect::as_any(value);
-                if let #FQOption::Some(value) = <dyn #FQAny>::downcast_ref::<Self>(value) {
-                    *self = #FQClone::clone(value);
-                } else {
-                    panic!("Value is not {}.", ::core::any::type_name::<Self>());
-                }
-            }
+            // #[inline]
+            // fn apply(&mut self, value: &dyn #bevy_reflect_path::Reflect) {
+            //     let value = #bevy_reflect_path::Reflect::as_any(value);
+            //     if let #FQOption::Some(value) = <dyn #FQAny>::downcast_ref::<Self>(value) {
+            //         *self = #FQClone::clone(value);
+            //     } else {
+            //         panic!("Value is not {}.", ::core::any::type_name::<Self>());
+            //     }
+            // }
 
             #[inline]
             fn set(&mut self, value: #FQBox<dyn #bevy_reflect_path::Reflect>) -> #FQResult<(), #FQBox<dyn #bevy_reflect_path::Reflect>> {

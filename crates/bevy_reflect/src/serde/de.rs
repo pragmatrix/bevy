@@ -738,7 +738,8 @@ impl<'a, 'de> Visitor<'de> for MapVisitor<'a> {
                 registration: value_registration,
                 registry: self.registry,
             })?;
-            dynamic_map.insert_boxed(key, value);
+            todo!("removed insert_box (FromReflect requirement removal)");
+            // dynamic_map.insert_boxed(key, value);
         }
 
         Ok(dynamic_map)

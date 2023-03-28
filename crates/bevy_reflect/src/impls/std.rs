@@ -1,7 +1,7 @@
 use crate::std_traits::ReflectDefault;
 use crate::{self as bevy_reflect, ReflectFromPtr, ReflectOwned};
 use crate::{
-    map_apply, map_partial_eq, Array, ArrayInfo, ArrayIter, DynamicEnum, DynamicMap, Enum,
+    /*map_apply,*/ map_partial_eq, Array, ArrayInfo, ArrayIter, DynamicEnum, DynamicMap, Enum,
     EnumInfo, FromReflect, FromType, GetTypeRegistration, List, ListInfo, Map, MapInfo, MapIter,
     Reflect, ReflectDeserialize, ReflectMut, ReflectRef, ReflectSerialize, TupleVariantInfo,
     TypeInfo, TypeRegistration, Typed, UnitVariantInfo, UnnamedField, ValueInfo, VariantFieldIter,
@@ -272,9 +272,9 @@ macro_rules! impl_reflect_for_veclike {
                 self
             }
 
-            fn apply(&mut self, value: &dyn Reflect) {
-                crate::list_apply(self, value);
-            }
+            // fn apply(&mut self, value: &dyn Reflect) {
+            //     crate::list_apply(self, value);
+            // }
 
             fn set(&mut self, value: Box<dyn Reflect>) -> Result<(), Box<dyn Reflect>> {
                 *self = value.take()?;
@@ -293,9 +293,9 @@ macro_rules! impl_reflect_for_veclike {
                 ReflectOwned::List(self)
             }
 
-            fn clone_value(&self) -> Box<dyn Reflect> {
-                Box::new(self.clone_dynamic())
-            }
+            // fn clone_value(&self) -> Box<dyn Reflect> {
+            //     Box::new(self.clone_dynamic())
+            // }
 
             fn reflect_hash(&self) -> Option<u64> {
                 crate::list_hash(self)
@@ -351,8 +351,8 @@ macro_rules! impl_reflect_for_hashmap {
     ($ty:ty) => {
         impl<K, V, S> Map for $ty
         where
-            K: FromReflect + Eq + Hash,
-            V: FromReflect,
+            K: Reflect + Eq + Hash,
+            V: Reflect,
             S: BuildHasher + Send + Sync + 'static,
         {
             fn get(&self, key: &dyn Reflect) -> Option<&dyn Reflect> {
@@ -395,35 +395,35 @@ macro_rules! impl_reflect_for_hashmap {
                     .collect()
             }
 
-            fn clone_dynamic(&self) -> DynamicMap {
-                let mut dynamic_map = DynamicMap::default();
-                dynamic_map.set_name(self.type_name().to_string());
-                for (k, v) in self {
-                    dynamic_map.insert_boxed(k.clone_value(), v.clone_value());
-                }
-                dynamic_map
-            }
+            // fn clone_dynamic(&self) -> DynamicMap {
+            //     let mut dynamic_map = DynamicMap::default();
+            //     dynamic_map.set_name(self.type_name().to_string());
+            //     for (k, v) in self {
+            //         dynamic_map.insert_boxed(k.clone_value(), v.clone_value());
+            //     }
+            //     dynamic_map
+            // }
 
-            fn insert_boxed(
-                &mut self,
-                key: Box<dyn Reflect>,
-                value: Box<dyn Reflect>,
-            ) -> Option<Box<dyn Reflect>> {
-                let key = K::take_from_reflect(key).unwrap_or_else(|key| {
-                    panic!(
-                        "Attempted to insert invalid key of type {}.",
-                        key.type_name()
-                    )
-                });
-                let value = V::take_from_reflect(value).unwrap_or_else(|value| {
-                    panic!(
-                        "Attempted to insert invalid value of type {}.",
-                        value.type_name()
-                    )
-                });
-                self.insert(key, value)
-                    .map(|old_value| Box::new(old_value) as Box<dyn Reflect>)
-            }
+            // fn insert_boxed(
+            //     &mut self,
+            //     key: Box<dyn Reflect>,
+            //     value: Box<dyn Reflect>,
+            // ) -> Option<Box<dyn Reflect>> {
+            //     let key = K::take_from_reflect(key).unwrap_or_else(|key| {
+            //         panic!(
+            //             "Attempted to insert invalid key of type {}.",
+            //             key.type_name()
+            //         )
+            //     });
+            //     let value = V::take_from_reflect(value).unwrap_or_else(|value| {
+            //         panic!(
+            //             "Attempted to insert invalid value of type {}.",
+            //             value.type_name()
+            //         )
+            //     });
+            //     self.insert(key, value)
+            //         .map(|old_value| Box::new(old_value) as Box<dyn Reflect>)
+            // }
 
             fn remove(&mut self, key: &dyn Reflect) -> Option<Box<dyn Reflect>> {
                 let mut from_reflect = None;
@@ -439,8 +439,8 @@ macro_rules! impl_reflect_for_hashmap {
 
         impl<K, V, S> Reflect for $ty
         where
-            K: FromReflect + Eq + Hash,
-            V: FromReflect,
+            K: Reflect + Eq + Hash,
+            V: Reflect,
             S: BuildHasher + Send + Sync + 'static,
         {
             fn type_name(&self) -> &str {
@@ -476,9 +476,9 @@ macro_rules! impl_reflect_for_hashmap {
                 self
             }
 
-            fn apply(&mut self, value: &dyn Reflect) {
-                map_apply(self, value);
-            }
+            // fn apply(&mut self, value: &dyn Reflect) {
+            //     map_apply(self, value);
+            // }
 
             fn set(&mut self, value: Box<dyn Reflect>) -> Result<(), Box<dyn Reflect>> {
                 *self = value.take()?;
@@ -497,9 +497,9 @@ macro_rules! impl_reflect_for_hashmap {
                 ReflectOwned::Map(self)
             }
 
-            fn clone_value(&self) -> Box<dyn Reflect> {
-                Box::new(self.clone_dynamic())
-            }
+            // fn clone_value(&self) -> Box<dyn Reflect> {
+            //     Box::new(self.clone_dynamic())
+            // }
 
             fn reflect_partial_eq(&self, value: &dyn Reflect) -> Option<bool> {
                 map_partial_eq(self, value)
@@ -508,8 +508,8 @@ macro_rules! impl_reflect_for_hashmap {
 
         impl<K, V, S> Typed for $ty
         where
-            K: FromReflect + Eq + Hash,
-            V: FromReflect,
+            K: Reflect + Eq + Hash,
+            V: Reflect,
             S: BuildHasher + Send + Sync + 'static,
         {
             fn type_info() -> &'static TypeInfo {
@@ -626,10 +626,10 @@ impl<T: Reflect, const N: usize> Reflect for [T; N] {
         self
     }
 
-    #[inline]
-    fn apply(&mut self, value: &dyn Reflect) {
-        crate::array_apply(self, value);
-    }
+    // #[inline]
+    // fn apply(&mut self, value: &dyn Reflect) {
+    //     crate::array_apply(self, value);
+    // }
 
     #[inline]
     fn set(&mut self, value: Box<dyn Reflect>) -> Result<(), Box<dyn Reflect>> {
@@ -652,10 +652,10 @@ impl<T: Reflect, const N: usize> Reflect for [T; N] {
         ReflectOwned::Array(self)
     }
 
-    #[inline]
-    fn clone_value(&self) -> Box<dyn Reflect> {
-        Box::new(self.clone_dynamic())
-    }
+    // #[inline]
+    // fn clone_value(&self) -> Box<dyn Reflect> {
+    //     Box::new(self.clone_dynamic())
+    // }
 
     #[inline]
     fn reflect_hash(&self) -> Option<u64> {
@@ -719,7 +719,7 @@ impl<T: FromReflect> GetTypeRegistration for Option<T> {
     }
 }
 
-impl<T: FromReflect> Enum for Option<T> {
+impl<T: Reflect> Enum for Option<T> {
     fn field(&self, _name: &str) -> Option<&dyn Reflect> {
         None
     }
@@ -785,12 +785,12 @@ impl<T: FromReflect> Enum for Option<T> {
         }
     }
 
-    fn clone_dynamic(&self) -> DynamicEnum {
-        DynamicEnum::from_ref::<Self>(self)
-    }
+    // fn clone_dynamic(&self) -> DynamicEnum {
+    //     DynamicEnum::from_ref::<Self>(self)
+    // }
 }
 
-impl<T: FromReflect> Reflect for Option<T> {
+impl<T: Reflect> Reflect for Option<T> {
     #[inline]
     fn type_name(&self) -> &str {
         std::any::type_name::<Self>()
@@ -829,48 +829,48 @@ impl<T: FromReflect> Reflect for Option<T> {
         self
     }
 
-    #[inline]
-    fn apply(&mut self, value: &dyn Reflect) {
-        if let ReflectRef::Enum(value) = value.reflect_ref() {
-            if self.variant_name() == value.variant_name() {
-                // Same variant -> just update fields
-                for (index, field) in value.iter_fields().enumerate() {
-                    if let Some(v) = self.field_at_mut(index) {
-                        v.apply(field.value());
-                    }
-                }
-            } else {
-                // New variant -> perform a switch
-                match value.variant_name() {
-                    "Some" => {
-                        let field = T::take_from_reflect(
-                            value
-                                .field_at(0)
-                                .unwrap_or_else(|| {
-                                    panic!(
-                                        "Field in `Some` variant of {} should exist",
-                                        std::any::type_name::<Option<T>>()
-                                    )
-                                })
-                                .clone_value(),
-                        )
-                        .unwrap_or_else(|_| {
-                            panic!(
-                                "Field in `Some` variant of {} should be of type {}",
-                                std::any::type_name::<Option<T>>(),
-                                std::any::type_name::<T>()
-                            )
-                        });
-                        *self = Some(field);
-                    }
-                    "None" => {
-                        *self = None;
-                    }
-                    _ => panic!("Enum is not a {}.", std::any::type_name::<Self>()),
-                }
-            }
-        }
-    }
+    // #[inline]
+    // fn apply(&mut self, value: &dyn Reflect) {
+    //     if let ReflectRef::Enum(value) = value.reflect_ref() {
+    //         if self.variant_name() == value.variant_name() {
+    //             // Same variant -> just update fields
+    //             for (index, field) in value.iter_fields().enumerate() {
+    //                 if let Some(v) = self.field_at_mut(index) {
+    //                     v.apply(field.value());
+    //                 }
+    //             }
+    //         } else {
+    //             // New variant -> perform a switch
+    //             match value.variant_name() {
+    //                 "Some" => {
+    //                     let field = T::take_from_reflect(
+    //                         value
+    //                             .field_at(0)
+    //                             .unwrap_or_else(|| {
+    //                                 panic!(
+    //                                     "Field in `Some` variant of {} should exist",
+    //                                     std::any::type_name::<Option<T>>()
+    //                                 )
+    //                             })
+    //                             .clone_value(),
+    //                     )
+    //                     .unwrap_or_else(|_| {
+    //                         panic!(
+    //                             "Field in `Some` variant of {} should be of type {}",
+    //                             std::any::type_name::<Option<T>>(),
+    //                             std::any::type_name::<T>()
+    //                         )
+    //                     });
+    //                     *self = Some(field);
+    //                 }
+    //                 "None" => {
+    //                     *self = None;
+    //                 }
+    //                 _ => panic!("Enum is not a {}.", std::any::type_name::<Self>()),
+    //             }
+    //         }
+    //     }
+    // }
 
     #[inline]
     fn set(&mut self, value: Box<dyn Reflect>) -> Result<(), Box<dyn Reflect>> {
@@ -890,10 +890,10 @@ impl<T: FromReflect> Reflect for Option<T> {
         ReflectOwned::Enum(self)
     }
 
-    #[inline]
-    fn clone_value(&self) -> Box<dyn Reflect> {
-        Box::new(Enum::clone_dynamic(self))
-    }
+    // #[inline]
+    // fn clone_value(&self) -> Box<dyn Reflect> {
+    //     Box::new(Enum::clone_dynamic(self))
+    // }
 
     fn reflect_hash(&self) -> Option<u64> {
         crate::enum_hash(self)
@@ -904,45 +904,45 @@ impl<T: FromReflect> Reflect for Option<T> {
     }
 }
 
-impl<T: FromReflect> FromReflect for Option<T> {
-    fn from_reflect(reflect: &dyn Reflect) -> Option<Self> {
-        if let ReflectRef::Enum(dyn_enum) = reflect.reflect_ref() {
-            match dyn_enum.variant_name() {
-                "Some" => {
-                    let field = T::take_from_reflect(
-                        dyn_enum
-                            .field_at(0)
-                            .unwrap_or_else(|| {
-                                panic!(
-                                    "Field in `Some` variant of {} should exist",
-                                    std::any::type_name::<Option<T>>()
-                                )
-                            })
-                            .clone_value(),
-                    )
-                    .unwrap_or_else(|_| {
-                        panic!(
-                            "Field in `Some` variant of {} should be of type {}",
-                            std::any::type_name::<Option<T>>(),
-                            std::any::type_name::<T>()
-                        )
-                    });
-                    Some(Some(field))
-                }
-                "None" => Some(None),
-                name => panic!(
-                    "variant with name `{}` does not exist on enum `{}`",
-                    name,
-                    std::any::type_name::<Self>()
-                ),
-            }
-        } else {
-            None
-        }
-    }
-}
+// impl<T: FromReflect> FromReflect for Option<T> {
+//     fn from_reflect(reflect: &dyn Reflect) -> Option<Self> {
+//         if let ReflectRef::Enum(dyn_enum) = reflect.reflect_ref() {
+//             match dyn_enum.variant_name() {
+//                 "Some" => {
+//                     let field = T::take_from_reflect(
+//                         dyn_enum
+//                             .field_at(0)
+//                             .unwrap_or_else(|| {
+//                                 panic!(
+//                                     "Field in `Some` variant of {} should exist",
+//                                     std::any::type_name::<Option<T>>()
+//                                 )
+//                             })
+//                             .clone_value(),
+//                     )
+//                     .unwrap_or_else(|_| {
+//                         panic!(
+//                             "Field in `Some` variant of {} should be of type {}",
+//                             std::any::type_name::<Option<T>>(),
+//                             std::any::type_name::<T>()
+//                         )
+//                     });
+//                     Some(Some(field))
+//                 }
+//                 "None" => Some(None),
+//                 name => panic!(
+//                     "variant with name `{}` does not exist on enum `{}`",
+//                     name,
+//                     std::any::type_name::<Self>()
+//                 ),
+//             }
+//         } else {
+//             None
+//         }
+//     }
+// }
 
-impl<T: FromReflect> Typed for Option<T> {
+impl<T: Reflect> Typed for Option<T> {
     fn type_info() -> &'static TypeInfo {
         static CELL: GenericTypeInfoCell = GenericTypeInfoCell::new();
         CELL.get_or_insert::<Self, _>(|| {

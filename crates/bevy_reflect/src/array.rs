@@ -64,13 +64,13 @@ pub trait Array: Reflect {
     /// Drain the elements of this array to get a vector of owned values.
     fn drain(self: Box<Self>) -> Vec<Box<dyn Reflect>>;
 
-    /// Clones the list, producing a [`DynamicArray`].
-    fn clone_dynamic(&self) -> DynamicArray {
-        DynamicArray {
-            name: self.type_name().to_string(),
-            values: self.iter().map(|value| value.clone_value()).collect(),
-        }
-    }
+    // Clones the list, producing a [`DynamicArray`].
+    // fn clone_dynamic(&self) -> DynamicArray {
+    //     DynamicArray {
+    //         name: self.type_name().to_string(),
+    //         values: self.iter().map(|value| value.clone_value()).collect(),
+    //     }
+    // }
 }
 
 /// A container for compile-time array info.
@@ -243,9 +243,9 @@ impl Reflect for DynamicArray {
         self
     }
 
-    fn apply(&mut self, value: &dyn Reflect) {
-        array_apply(self, value);
-    }
+    // fn apply(&mut self, value: &dyn Reflect) {
+    //     array_apply(self, value);
+    // }
 
     #[inline]
     fn set(&mut self, value: Box<dyn Reflect>) -> Result<(), Box<dyn Reflect>> {
@@ -268,10 +268,10 @@ impl Reflect for DynamicArray {
         ReflectOwned::Array(self)
     }
 
-    #[inline]
-    fn clone_value(&self) -> Box<dyn Reflect> {
-        Box::new(self.clone_dynamic())
-    }
+    // #[inline]
+    // fn clone_value(&self) -> Box<dyn Reflect> {
+    //     Box::new(self.clone_dynamic())
+    // }
 
     #[inline]
     fn reflect_hash(&self) -> Option<u64> {
@@ -309,17 +309,17 @@ impl Array for DynamicArray {
         self.values.into_vec()
     }
 
-    #[inline]
-    fn clone_dynamic(&self) -> DynamicArray {
-        DynamicArray {
-            name: self.name.clone(),
-            values: self
-                .values
-                .iter()
-                .map(|value| value.clone_value())
-                .collect(),
-        }
-    }
+    // #[inline]
+    // fn clone_dynamic(&self) -> DynamicArray {
+    //     DynamicArray {
+    //         name: self.name.clone(),
+    //         values: self
+    //             .values
+    //             .iter()
+    //             .map(|value| value.clone_value())
+    //             .collect(),
+    //     }
+    // }
 }
 
 impl Typed for DynamicArray {
@@ -381,20 +381,20 @@ pub fn array_hash<A: Array>(array: &A) -> Option<u64> {
 /// * Panics if the two arrays have differing lengths.
 /// * Panics if the reflected value is not a [valid array](ReflectRef::Array).
 ///
-#[inline]
-pub fn array_apply<A: Array>(array: &mut A, reflect: &dyn Reflect) {
-    if let ReflectRef::Array(reflect_array) = reflect.reflect_ref() {
-        if array.len() != reflect_array.len() {
-            panic!("Attempted to apply different sized `Array` types.");
-        }
-        for (i, value) in reflect_array.iter().enumerate() {
-            let v = array.get_mut(i).unwrap();
-            v.apply(value);
-        }
-    } else {
-        panic!("Attempted to apply a non-`Array` type to an `Array` type.");
-    }
-}
+// #[inline]
+// pub fn array_apply<A: Array>(array: &mut A, reflect: &dyn Reflect) {
+//     if let ReflectRef::Array(reflect_array) = reflect.reflect_ref() {
+//         if array.len() != reflect_array.len() {
+//             panic!("Attempted to apply different sized `Array` types.");
+//         }
+//         for (i, value) in reflect_array.iter().enumerate() {
+//             let v = array.get_mut(i).unwrap();
+//             v.apply(value);
+//         }
+//     } else {
+//         panic!("Attempted to apply a non-`Array` type to an `Array` type.");
+//     }
+// }
 
 /// Compares two [arrays](Array) (one concrete and one reflected) to see if they
 /// are equal.

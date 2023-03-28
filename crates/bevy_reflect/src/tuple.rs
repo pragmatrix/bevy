@@ -47,8 +47,8 @@ pub trait Tuple: Reflect {
     /// Drain the fields of this tuple to get a vector of owned values.
     fn drain(self: Box<Self>) -> Vec<Box<dyn Reflect>>;
 
-    /// Clones the struct into a [`DynamicTuple`].
-    fn clone_dynamic(&self) -> DynamicTuple;
+    // Clones the struct into a [`DynamicTuple`].
+    //fn clone_dynamic(&self) -> DynamicTuple;
 }
 
 /// An iterator over the field values of a tuple.
@@ -281,17 +281,17 @@ impl Tuple for DynamicTuple {
         self.fields
     }
 
-    #[inline]
-    fn clone_dynamic(&self) -> DynamicTuple {
-        DynamicTuple {
-            name: self.name.clone(),
-            fields: self
-                .fields
-                .iter()
-                .map(|value| value.clone_value())
-                .collect(),
-        }
-    }
+    // #[inline]
+    // fn clone_dynamic(&self) -> DynamicTuple {
+    //     DynamicTuple {
+    //         name: self.name.clone(),
+    //         fields: self
+    //             .fields
+    //             .iter()
+    //             .map(|value| value.clone_value())
+    //             .collect(),
+    //     }
+    // }
 }
 
 impl Reflect for DynamicTuple {
@@ -335,10 +335,10 @@ impl Reflect for DynamicTuple {
         self
     }
 
-    #[inline]
-    fn clone_value(&self) -> Box<dyn Reflect> {
-        Box::new(self.clone_dynamic())
-    }
+    // #[inline]
+    // fn clone_value(&self) -> Box<dyn Reflect> {
+    //     Box::new(self.clone_dynamic())
+    // }
 
     #[inline]
     fn reflect_ref(&self) -> ReflectRef {
@@ -355,9 +355,9 @@ impl Reflect for DynamicTuple {
         ReflectOwned::Tuple(self)
     }
 
-    fn apply(&mut self, value: &dyn Reflect) {
-        tuple_apply(self, value);
-    }
+    // fn apply(&mut self, value: &dyn Reflect) {
+    //     tuple_apply(self, value);
+    // }
 
     fn set(&mut self, value: Box<dyn Reflect>) -> Result<(), Box<dyn Reflect>> {
         *self = value.take()?;
@@ -387,18 +387,18 @@ impl Typed for DynamicTuple {
 /// # Panics
 ///
 /// This function panics if `b` is not a tuple.
-#[inline]
-pub fn tuple_apply<T: Tuple>(a: &mut T, b: &dyn Reflect) {
-    if let ReflectRef::Tuple(tuple) = b.reflect_ref() {
-        for (i, value) in tuple.iter_fields().enumerate() {
-            if let Some(v) = a.field_mut(i) {
-                v.apply(value);
-            }
-        }
-    } else {
-        panic!("Attempted to apply non-Tuple type to Tuple type.");
-    }
-}
+// #[inline]
+// pub fn tuple_apply<T: Tuple>(a: &mut T, b: &dyn Reflect) {
+//     if let ReflectRef::Tuple(tuple) = b.reflect_ref() {
+//         for (i, value) in tuple.iter_fields().enumerate() {
+//             if let Some(v) = a.field_mut(i) {
+//                 v.apply(value);
+//             }
+//         }
+//     } else {
+//         panic!("Attempted to apply non-Tuple type to Tuple type.");
+//     }
+// }
 
 /// Compares a [`Tuple`] with a [`Reflect`] value.
 ///
@@ -494,18 +494,18 @@ macro_rules! impl_reflect_tuple {
                 ]
             }
 
-            #[inline]
-            fn clone_dynamic(&self) -> DynamicTuple {
-                let mut dyn_tuple = DynamicTuple {
-                    name: String::default(),
-                    fields: self
-                        .iter_fields()
-                        .map(|value| value.clone_value())
-                        .collect(),
-                };
-                dyn_tuple.generate_name();
-                dyn_tuple
-            }
+            // #[inline]
+            // fn clone_dynamic(&self) -> DynamicTuple {
+            //     let mut dyn_tuple = DynamicTuple {
+            //         name: String::default(),
+            //         fields: self
+            //             .iter_fields()
+            //             .map(|value| value.clone_value())
+            //             .collect(),
+            //     };
+            //     dyn_tuple.generate_name();
+            //     dyn_tuple
+            // }
         }
 
         impl<$($name: Reflect),*> Reflect for ($($name,)*) {
@@ -541,9 +541,9 @@ macro_rules! impl_reflect_tuple {
                 self
             }
 
-            fn apply(&mut self, value: &dyn Reflect) {
-                crate::tuple_apply(self, value);
-            }
+            // fn apply(&mut self, value: &dyn Reflect) {
+            //     crate::tuple_apply(self, value);
+            // }
 
             fn set(&mut self, value: Box<dyn Reflect>) -> Result<(), Box<dyn Reflect>> {
                 *self = value.take()?;
@@ -562,9 +562,9 @@ macro_rules! impl_reflect_tuple {
                 ReflectOwned::Tuple(self)
             }
 
-            fn clone_value(&self) -> Box<dyn Reflect> {
-                Box::new(self.clone_dynamic())
-            }
+            // fn clone_value(&self) -> Box<dyn Reflect> {
+            //     Box::new(self.clone_dynamic())
+            // }
 
             fn reflect_partial_eq(&self, value: &dyn Reflect) -> Option<bool> {
                 crate::tuple_partial_eq(self, value)

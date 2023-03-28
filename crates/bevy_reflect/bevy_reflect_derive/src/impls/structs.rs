@@ -149,12 +149,12 @@ pub(crate) fn impl_struct(reflect_struct: &ReflectStruct) -> TokenStream {
                 #bevy_reflect_path::FieldIter::new(self)
             }
 
-            fn clone_dynamic(&self) -> #bevy_reflect_path::DynamicStruct {
-                let mut dynamic: #bevy_reflect_path::DynamicStruct = #FQDefault::default();
-                dynamic.set_name(::std::string::ToString::to_string(#bevy_reflect_path::Reflect::type_name(self)));
-                #(dynamic.insert_boxed(#field_names, #bevy_reflect_path::Reflect::clone_value(&self.#field_idents));)*
-                dynamic
-            }
+            // fn clone_dynamic(&self) -> #bevy_reflect_path::DynamicStruct {
+            //     let mut dynamic: #bevy_reflect_path::DynamicStruct = #FQDefault::default();
+            //     dynamic.set_name(::std::string::ToString::to_string(#bevy_reflect_path::Reflect::type_name(self)));
+            //     #(dynamic.insert_boxed(#field_names, #bevy_reflect_path::Reflect::clone_value(&self.#field_idents));)*
+            //     dynamic
+            // }
         }
 
         impl #impl_generics #bevy_reflect_path::Reflect for #struct_name #ty_generics #where_reflect_clause {
@@ -198,10 +198,10 @@ pub(crate) fn impl_struct(reflect_struct: &ReflectStruct) -> TokenStream {
                 self
             }
 
-            #[inline]
-            fn clone_value(&self) -> #FQBox<dyn #bevy_reflect_path::Reflect> {
-                #FQBox::new(#bevy_reflect_path::Struct::clone_dynamic(self))
-            }
+            // #[inline]
+            // fn clone_value(&self) -> #FQBox<dyn #bevy_reflect_path::Reflect> {
+            //     #FQBox::new(#bevy_reflect_path::Struct::clone_dynamic(self))
+            // }
 
             #[inline]
             fn set(&mut self, value: #FQBox<dyn #bevy_reflect_path::Reflect>) -> #FQResult<(), #FQBox<dyn #bevy_reflect_path::Reflect>> {
@@ -209,17 +209,17 @@ pub(crate) fn impl_struct(reflect_struct: &ReflectStruct) -> TokenStream {
                 #FQResult::Ok(())
             }
 
-            #[inline]
-            fn apply(&mut self, value: &dyn #bevy_reflect_path::Reflect) {
-                if let #bevy_reflect_path::ReflectRef::Struct(struct_value) = #bevy_reflect_path::Reflect::reflect_ref(value) {
-                    for (i, value) in ::core::iter::Iterator::enumerate(#bevy_reflect_path::Struct::iter_fields(struct_value)) {
-                        let name = #bevy_reflect_path::Struct::name_at(struct_value, i).unwrap();
-                        #bevy_reflect_path::Struct::field_mut(self, name).map(|v| v.apply(value));
-                    }
-                } else {
-                    panic!("Attempted to apply non-struct type to struct type.");
-                }
-            }
+            // #[inline]
+            // fn apply(&mut self, value: &dyn #bevy_reflect_path::Reflect) {
+            //     if let #bevy_reflect_path::ReflectRef::Struct(struct_value) = #bevy_reflect_path::Reflect::reflect_ref(value) {
+            //         for (i, value) in ::core::iter::Iterator::enumerate(#bevy_reflect_path::Struct::iter_fields(struct_value)) {
+            //             let name = #bevy_reflect_path::Struct::name_at(struct_value, i).unwrap();
+            //             #bevy_reflect_path::Struct::field_mut(self, name).map(|v| v.apply(value));
+            //         }
+            //     } else {
+            //         panic!("Attempted to apply non-struct type to struct type.");
+            //     }
+            // }
 
             fn reflect_ref(&self) -> #bevy_reflect_path::ReflectRef {
                 #bevy_reflect_path::ReflectRef::Struct(self)

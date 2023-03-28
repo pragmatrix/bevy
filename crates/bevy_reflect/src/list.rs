@@ -94,13 +94,13 @@ pub trait List: Reflect {
     /// Drain the elements of this list to get a vector of owned values.
     fn drain(self: Box<Self>) -> Vec<Box<dyn Reflect>>;
 
-    /// Clones the list, producing a [`DynamicList`].
-    fn clone_dynamic(&self) -> DynamicList {
-        DynamicList {
-            name: self.type_name().to_string(),
-            values: self.iter().map(|value| value.clone_value()).collect(),
-        }
-    }
+    // Clones the list, producing a [`DynamicList`].
+    // fn clone_dynamic(&self) -> DynamicList {
+    //     DynamicList {
+    //         name: self.type_name().to_string(),
+    //         values: self.iter().map(|value| value.clone_value()).collect(),
+    //     }
+    // }
 }
 
 /// A container for compile-time list info.
@@ -246,16 +246,28 @@ impl List for DynamicList {
         self.values
     }
 
-    fn clone_dynamic(&self) -> DynamicList {
-        DynamicList {
-            name: self.name.clone(),
-            values: self
-                .values
-                .iter()
-                .map(|value| value.clone_value())
-                .collect(),
-        }
+    fn len(&self) -> usize {
+        self.values.len()
     }
+
+    fn iter(&self) -> ListIter {
+        ListIter::new(self)
+    }
+
+    fn drain(self: Box<Self>) -> Vec<Box<dyn Reflect>> {
+        self.values
+    }
+
+    // fn clone_dynamic(&self) -> DynamicList {
+    //     DynamicList {
+    //         name: self.name.clone(),
+    //         values: self
+    //             .values
+    //             .iter()
+    //             .map(|value| value.clone_value())
+    //             .collect(),
+    //     }
+    // }
 }
 
 impl Reflect for DynamicList {
@@ -299,9 +311,9 @@ impl Reflect for DynamicList {
         self
     }
 
-    fn apply(&mut self, value: &dyn Reflect) {
-        list_apply(self, value);
-    }
+    // fn apply(&mut self, value: &dyn Reflect) {
+    //     list_apply(self, value);
+    // }
 
     #[inline]
     fn set(&mut self, value: Box<dyn Reflect>) -> Result<(), Box<dyn Reflect>> {
@@ -324,10 +336,10 @@ impl Reflect for DynamicList {
         ReflectOwned::List(self)
     }
 
-    #[inline]
-    fn clone_value(&self) -> Box<dyn Reflect> {
-        Box::new(self.clone_dynamic())
-    }
+    // #[inline]
+    // fn clone_value(&self) -> Box<dyn Reflect> {
+    //     Box::new(self.clone_dynamic())
+    // }
 
     #[inline]
     fn reflect_hash(&self) -> Option<u64> {
@@ -420,22 +432,22 @@ pub fn list_hash<L: List>(list: &L) -> Option<u64> {
 /// # Panics
 ///
 /// This function panics if `b` is not a list.
-#[inline]
-pub fn list_apply<L: List>(a: &mut L, b: &dyn Reflect) {
-    if let ReflectRef::List(list_value) = b.reflect_ref() {
-        for (i, value) in list_value.iter().enumerate() {
-            if i < a.len() {
-                if let Some(v) = a.get_mut(i) {
-                    v.apply(value);
-                }
-            } else {
-                a.push(value.clone_value());
-            }
-        }
-    } else {
-        panic!("Attempted to apply a non-list type to a list type.");
-    }
-}
+// #[inline]
+// pub fn list_apply<L: List>(a: &mut L, b: &dyn Reflect) {
+//     if let ReflectRef::List(list_value) = b.reflect_ref() {
+//         for (i, value) in list_value.iter().enumerate() {
+//             if i < a.len() {
+//                 if let Some(v) = a.get_mut(i) {
+//                     v.apply(value);
+//                 }
+//             } else {
+//                 a.push(value.clone_value());
+//             }
+//         }
+//     } else {
+//         panic!("Attempted to apply a non-list type to a list type.");
+//     }
+// }
 
 /// Compares a [`List`] with a [`Reflect`] value.
 ///

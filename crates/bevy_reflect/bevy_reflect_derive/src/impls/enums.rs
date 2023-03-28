@@ -180,9 +180,9 @@ pub(crate) fn impl_enum(reflect_enum: &ReflectEnum) -> TokenStream {
                 }
             }
 
-            fn clone_dynamic(&self) -> #bevy_reflect_path::DynamicEnum {
-                #bevy_reflect_path::DynamicEnum::from_ref::<Self>(self)
-            }
+            // fn clone_dynamic(&self) -> #bevy_reflect_path::DynamicEnum {
+            //     #bevy_reflect_path::DynamicEnum::from_ref::<Self>(self)
+            // }
         }
 
         impl #impl_generics #bevy_reflect_path::Reflect for #enum_name #ty_generics #where_reflect_clause {
@@ -226,10 +226,10 @@ pub(crate) fn impl_enum(reflect_enum: &ReflectEnum) -> TokenStream {
                 self
             }
 
-            #[inline]
-            fn clone_value(&self) -> #FQBox<dyn #bevy_reflect_path::Reflect> {
-                #FQBox::new(#bevy_reflect_path::Enum::clone_dynamic(self))
-            }
+            // #[inline]
+            // fn clone_value(&self) -> #FQBox<dyn #bevy_reflect_path::Reflect> {
+            //     #FQBox::new(#bevy_reflect_path::Enum::clone_dynamic(self))
+            // }
 
             #[inline]
             fn set(&mut self, #ref_value: #FQBox<dyn #bevy_reflect_path::Reflect>) -> #FQResult<(), #FQBox<dyn #bevy_reflect_path::Reflect>> {
@@ -237,38 +237,38 @@ pub(crate) fn impl_enum(reflect_enum: &ReflectEnum) -> TokenStream {
                 #FQResult::Ok(())
             }
 
-            #[inline]
-            fn apply(&mut self, #ref_value: &dyn #bevy_reflect_path::Reflect) {
-                if let #bevy_reflect_path::ReflectRef::Enum(#ref_value) = #bevy_reflect_path::Reflect::reflect_ref(#ref_value) {
-                    if #bevy_reflect_path::Enum::variant_name(self) == #bevy_reflect_path::Enum::variant_name(#ref_value) {
-                        // Same variant -> just update fields
-                        match #bevy_reflect_path::Enum::variant_type(#ref_value) {
-                            #bevy_reflect_path::VariantType::Struct => {
-                                for field in #bevy_reflect_path::Enum::iter_fields(#ref_value) {
-                                    let name = field.name().unwrap();
-                                    #bevy_reflect_path::Enum::field_mut(self, name).map(|v| v.apply(field.value()));
-                                }
-                            }
-                            #bevy_reflect_path::VariantType::Tuple => {
-                                for (index, field) in ::core::iter::Iterator::enumerate(#bevy_reflect_path::Enum::iter_fields(#ref_value)) {
-                                    #bevy_reflect_path::Enum::field_at_mut(self, index).map(|v| v.apply(field.value()));
-                                }
-                            }
-                            _ => {}
-                        }
-                    } else {
-                        // New variant -> perform a switch
-                        match #bevy_reflect_path::Enum::variant_name(#ref_value) {
-                            #(#variant_names => {
-                                *self = #variant_constructors
-                            })*
-                            name => panic!("variant with name `{}` does not exist on enum `{}`", name, ::core::any::type_name::<Self>()),
-                        }
-                    }
-                } else {
-                    panic!("`{}` is not an enum", #bevy_reflect_path::Reflect::type_name(#ref_value));
-                }
-            }
+            // #[inline]
+            // fn apply(&mut self, #ref_value: &dyn #bevy_reflect_path::Reflect) {
+            //     if let #bevy_reflect_path::ReflectRef::Enum(#ref_value) = #bevy_reflect_path::Reflect::reflect_ref(#ref_value) {
+            //         if #bevy_reflect_path::Enum::variant_name(self) == #bevy_reflect_path::Enum::variant_name(#ref_value) {
+            //             // Same variant -> just update fields
+            //             match #bevy_reflect_path::Enum::variant_type(#ref_value) {
+            //                 #bevy_reflect_path::VariantType::Struct => {
+            //                     for field in #bevy_reflect_path::Enum::iter_fields(#ref_value) {
+            //                         let name = field.name().unwrap();
+            //                         #bevy_reflect_path::Enum::field_mut(self, name).map(|v| v.apply(field.value()));
+            //                     }
+            //                 }
+            //                 #bevy_reflect_path::VariantType::Tuple => {
+            //                     for (index, field) in ::core::iter::Iterator::enumerate(#bevy_reflect_path::Enum::iter_fields(#ref_value)) {
+            //                         #bevy_reflect_path::Enum::field_at_mut(self, index).map(|v| v.apply(field.value()));
+            //                     }
+            //                 }
+            //                 _ => {}
+            //             }
+            //         } else {
+            //             // New variant -> perform a switch
+            //             match #bevy_reflect_path::Enum::variant_name(#ref_value) {
+            //                 #(#variant_names => {
+            //                     *self = #variant_constructors
+            //                 })*
+            //                 name => panic!("variant with name `{}` does not exist on enum `{}`", name, ::core::any::type_name::<Self>()),
+            //             }
+            //         }
+            //     } else {
+            //         panic!("`{}` is not an enum", #bevy_reflect_path::Reflect::type_name(#ref_value));
+            //     }
+            // }
 
             fn reflect_ref(&self) -> #bevy_reflect_path::ReflectRef {
                 #bevy_reflect_path::ReflectRef::Enum(self)

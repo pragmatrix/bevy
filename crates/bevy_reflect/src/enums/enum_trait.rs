@@ -119,7 +119,7 @@ pub trait Enum: Reflect {
     /// The type of the current variant.
     fn variant_type(&self) -> VariantType;
     // Clones the enum into a [`DynamicEnum`].
-    fn clone_dynamic(&self) -> DynamicEnum;
+    // fn clone_dynamic(&self) -> DynamicEnum;
     /// Returns true if the current variant's type matches the given one.
     fn is_variant(&self, variant_type: VariantType) -> bool {
         self.variant_type() == variant_type

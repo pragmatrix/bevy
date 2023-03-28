@@ -144,7 +144,7 @@ pub trait Reflect: Any + Send + Sync {
     /// - If `T` is any complex type and the corresponding fields or elements of
     ///   `self` and `value` are not of the same type.
     /// - If `T` is a value type and `self` cannot be downcast to `T`
-    fn apply(&mut self, value: &dyn Reflect);
+    // fn apply(&mut self, value: &dyn Reflect);
 
     /// Performs a type-checked assignment of a reflected value to this value.
     ///
@@ -167,6 +167,7 @@ pub trait Reflect: Any + Send + Sync {
     /// See [`ReflectOwned`].
     fn reflect_owned(self: Box<Self>) -> ReflectOwned;
 
+    /*
     /// Clones the value as a `Reflect` trait object.
     ///
     /// When deriving `Reflect` for a struct, tuple struct or enum, the value is
@@ -174,7 +175,8 @@ pub trait Reflect: Any + Send + Sync {
     /// or [`Enum::clone_dynamic`], respectively.
     /// Implementors of other `Reflect` subtraits (e.g. [`List`], [`Map`]) should
     /// use those subtraits' respective `clone_dynamic` methods.
-    fn clone_value(&self) -> Box<dyn Reflect>;
+     */
+    // fn clone_value(&self) -> Box<dyn Reflect>;
 
     /// Returns a hash of the value (which includes the type).
     ///

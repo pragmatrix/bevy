@@ -68,8 +68,8 @@ pub trait Struct: Reflect {
     /// Returns an iterator over the values of the reflectable fields for this struct.
     fn iter_fields(&self) -> FieldIter;
 
-    /// Clones the struct into a [`DynamicStruct`].
-    fn clone_dynamic(&self) -> DynamicStruct;
+    // Clones the struct into a [`DynamicStruct`].
+    // fn clone_dynamic(&self) -> DynamicStruct;
 }
 
 /// A container for compile-time named struct info.
@@ -368,18 +368,18 @@ impl Struct for DynamicStruct {
         }
     }
 
-    fn clone_dynamic(&self) -> DynamicStruct {
-        DynamicStruct {
-            name: self.name.clone(),
-            field_names: self.field_names.clone(),
-            field_indices: self.field_indices.clone(),
-            fields: self
-                .fields
-                .iter()
-                .map(|value| value.clone_value())
-                .collect(),
-        }
-    }
+    // fn clone_dynamic(&self) -> DynamicStruct {
+    //     DynamicStruct {
+    //         name: self.name.clone(),
+    //         field_names: self.field_names.clone(),
+    //         field_indices: self.field_indices.clone(),
+    //         fields: self
+    //             .fields
+    //             .iter()
+    //             .map(|value| value.clone_value())
+    //             .collect(),
+    //     }
+    // }
 }
 
 impl Reflect for DynamicStruct {
@@ -423,10 +423,10 @@ impl Reflect for DynamicStruct {
         self
     }
 
-    #[inline]
-    fn clone_value(&self) -> Box<dyn Reflect> {
-        Box::new(self.clone_dynamic())
-    }
+    // #[inline]
+    // fn clone_value(&self) -> Box<dyn Reflect> {
+    //     Box::new(self.clone_dynamic())
+    // }
 
     #[inline]
     fn reflect_ref(&self) -> ReflectRef {
@@ -443,18 +443,18 @@ impl Reflect for DynamicStruct {
         ReflectOwned::Struct(self)
     }
 
-    fn apply(&mut self, value: &dyn Reflect) {
-        if let ReflectRef::Struct(struct_value) = value.reflect_ref() {
-            for (i, value) in struct_value.iter_fields().enumerate() {
-                let name = struct_value.name_at(i).unwrap();
-                if let Some(v) = self.field_mut(name) {
-                    v.apply(value);
-                }
-            }
-        } else {
-            panic!("Attempted to apply non-struct type to struct type.");
-        }
-    }
+    // fn apply(&mut self, value: &dyn Reflect) {
+    //     if let ReflectRef::Struct(struct_value) = value.reflect_ref() {
+    //         for (i, value) in struct_value.iter_fields().enumerate() {
+    //             let name = struct_value.name_at(i).unwrap();
+    //             if let Some(v) = self.field_mut(name) {
+    //                 v.apply(value);
+    //             }
+    //         }
+    //     } else {
+    //         panic!("Attempted to apply non-struct type to struct type.");
+    //     }
+    // }
 
     fn set(&mut self, value: Box<dyn Reflect>) -> Result<(), Box<dyn Reflect>> {
         *self = value.take()?;

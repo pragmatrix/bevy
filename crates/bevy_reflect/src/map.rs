@@ -67,18 +67,23 @@ pub trait Map: Reflect {
     /// Drain the key-value pairs of this map to get a vector of owned values.
     fn drain(self: Box<Self>) -> Vec<(Box<dyn Reflect>, Box<dyn Reflect>)>;
 
+    /*
     /// Clones the map, producing a [`DynamicMap`].
-    fn clone_dynamic(&self) -> DynamicMap;
+     */
+    // fn clone_dynamic(&self) -> DynamicMap;
 
+    /*
     /// Inserts a key-value pair into the map.
     ///
     /// If the map did not have this key present, `None` is returned.
     /// If the map did have this key present, the value is updated, and the old value is returned.
-    fn insert_boxed(
-        &mut self,
-        key: Box<dyn Reflect>,
-        value: Box<dyn Reflect>,
-    ) -> Option<Box<dyn Reflect>>;
+     */
+
+    // fn insert_boxed(
+    //     &mut self,
+    //     key: Box<dyn Reflect>,
+    //     value: Box<dyn Reflect>,
+    // ) -> Option<Box<dyn Reflect>>;
 
     /// Removes an entry from the map.
     ///
@@ -206,10 +211,10 @@ impl DynamicMap {
         self.name = name;
     }
 
-    /// Inserts a typed key-value pair into the map.
-    pub fn insert<K: Reflect, V: Reflect>(&mut self, key: K, value: V) {
-        self.insert_boxed(Box::new(key), Box::new(value));
-    }
+    // /// Inserts a typed key-value pair into the map.
+    // pub fn insert<K: Reflect, V: Reflect>(&mut self, key: K, value: V) {
+    //     self.insert_boxed(Box::new(key), Box::new(value));
+    // }
 }
 
 impl Map for DynamicMap {
@@ -230,17 +235,17 @@ impl Map for DynamicMap {
         self.values.len()
     }
 
-    fn clone_dynamic(&self) -> DynamicMap {
-        DynamicMap {
-            name: self.name.clone(),
-            values: self
-                .values
-                .iter()
-                .map(|(key, value)| (key.clone_value(), value.clone_value()))
-                .collect(),
-            indices: self.indices.clone(),
-        }
-    }
+    // fn clone_dynamic(&self) -> DynamicMap {
+    //     DynamicMap {
+    //         name: self.name.clone(),
+    //         values: self
+    //             .values
+    //             .iter()
+    //             .map(|(key, value)| (key.clone_value(), value.clone_value()))
+    //             .collect(),
+    //         indices: self.indices.clone(),
+    //     }
+    // }
 
     fn iter(&self) -> MapIter {
         MapIter {
@@ -255,24 +260,24 @@ impl Map for DynamicMap {
             .map(|(key, value)| (&**key, &**value))
     }
 
-    fn insert_boxed(
-        &mut self,
-        key: Box<dyn Reflect>,
-        mut value: Box<dyn Reflect>,
-    ) -> Option<Box<dyn Reflect>> {
-        match self.indices.entry(key.reflect_hash().expect(HASH_ERROR)) {
-            Entry::Occupied(entry) => {
-                let (_old_key, old_value) = self.values.get_mut(*entry.get()).unwrap();
-                std::mem::swap(old_value, &mut value);
-                Some(value)
-            }
-            Entry::Vacant(entry) => {
-                entry.insert(self.values.len());
-                self.values.push((key, value));
-                None
-            }
-        }
-    }
+    // fn insert_boxed(
+    //     &mut self,
+    //     key: Box<dyn Reflect>,
+    //     mut value: Box<dyn Reflect>,
+    // ) -> Option<Box<dyn Reflect>> {
+    //     match self.indices.entry(key.reflect_hash().expect(HASH_ERROR)) {
+    //         Entry::Occupied(entry) => {
+    //             let (_old_key, old_value) = self.values.get_mut(*entry.get()).unwrap();
+    //             std::mem::swap(old_value, &mut value);
+    //             Some(value)
+    //         }
+    //         Entry::Vacant(entry) => {
+    //             entry.insert(self.values.len());
+    //             self.values.push((key, value));
+    //             None
+    //         }
+    //     }
+    // }
 
     fn remove(&mut self, key: &dyn Reflect) -> Option<Box<dyn Reflect>> {
         let index = self
@@ -324,9 +329,9 @@ impl Reflect for DynamicMap {
         self
     }
 
-    fn apply(&mut self, value: &dyn Reflect) {
-        map_apply(self, value);
-    }
+    // fn apply(&mut self, value: &dyn Reflect) {
+    //     map_apply(self, value);
+    // }
 
     fn set(&mut self, value: Box<dyn Reflect>) -> Result<(), Box<dyn Reflect>> {
         *self = value.take()?;
@@ -345,9 +350,9 @@ impl Reflect for DynamicMap {
         ReflectOwned::Map(self)
     }
 
-    fn clone_value(&self) -> Box<dyn Reflect> {
-        Box::new(self.clone_dynamic())
-    }
+    // fn clone_value(&self) -> Box<dyn Reflect> {
+    //     Box::new(self.clone_dynamic())
+    // }
 
     fn reflect_partial_eq(&self, value: &dyn Reflect) -> Option<bool> {
         map_partial_eq(self, value)
@@ -471,20 +476,20 @@ pub fn map_debug(dyn_map: &dyn Map, f: &mut std::fmt::Formatter<'_>) -> std::fmt
 /// # Panics
 ///
 /// This function panics if `b` is not a reflected map.
-#[inline]
-pub fn map_apply<M: Map>(a: &mut M, b: &dyn Reflect) {
-    if let ReflectRef::Map(map_value) = b.reflect_ref() {
-        for (key, b_value) in map_value.iter() {
-            if let Some(a_value) = a.get_mut(key) {
-                a_value.apply(b_value);
-            } else {
-                a.insert_boxed(key.clone_value(), b_value.clone_value());
-            }
-        }
-    } else {
-        panic!("Attempted to apply a non-map type to a map type.");
-    }
-}
+// #[inline]
+// pub fn map_apply<M: Map>(a: &mut M, b: &dyn Reflect) {
+//     if let ReflectRef::Map(map_value) = b.reflect_ref() {
+//         for (key, b_value) in map_value.iter() {
+//             if let Some(a_value) = a.get_mut(key) {
+//                 a_value.apply(b_value);
+//             } else {
+//                 a.insert_boxed(key.clone_value(), b_value.clone_value());
+//             }
+//         }
+//     } else {
+//         panic!("Attempted to apply a non-map type to a map type.");
+//     }
+// }
 
 #[cfg(test)]
 mod tests {
